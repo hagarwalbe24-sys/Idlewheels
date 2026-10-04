@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>IdleWheels | Find a vehicle</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<main class="container">
+    <section class="hero">
+        <div>
+            <p class="hero-kicker">Your next ride is closer than you think</p>
+            <h1>Find a ride.<br>Make it yours for the day.</h1>
+            <p>Discover cars and bikes shared by local owners. Choose your dates, compare options, and message an owner directly.</p>
+        </div>
+        <div class="hero-art" aria-hidden="true"></div>
+    </section>
+    <section class="search-panel" aria-label="Search available vehicles">
+        <p class="eyebrow">Find your wheels</p>
+        <form th:action="@{/listings}" th:object="${searchForm}" method="get" class="search-form">
+            <div><label for="city">Where</label><input id="city" type="text" th:field="*{city}" placeholder="Any city"></div>
+            <div><label for="vehicleType">Vehicle type</label>
+                <select id="vehicleType" th:field="*{vehicleType}">
+                    <option value="">Any type</option><option value="CAR">Car</option><option value="BIKE">Bike</option>
+                </select>
+            </div>
+            <div><label for="minimumPrice">Min price per day</label><input id="minimumPrice" type="number" th:field="*{minimumPrice}" min="0.01" max="1000000" step="0.01" placeholder="No minimum"></div>
+            <div><label for="maximumPrice">Max price per day</label><input id="maximumPrice" type="number" th:field="*{maximumPrice}" min="0.01" max="1000000" step="0.01" placeholder="No maximum"></div>
+            <div><label for="availableFrom">Available from</label><input id="availableFrom" type="date" th:field="*{availableFrom}"></div>
+            <div><label for="availableTo">Available to</label><input id="availableTo" type="date" th:field="*{availableTo}"></div>
+            <div><label for="sort">Sort by</label><select id="sort" th:field="*{sort}">
+                <option value="NEWEST">Newest</option><option value="PRICE_LOW_TO_HIGH">Price: low to high</option><option value="PRICE_HIGH_TO_LOW">Price: high to low</option>
+            </select></div>
+            <input type="hidden" th:field="*{page}">
+            <p class="error" th:errors="*{minimumPrice}"></p><p class="error" th:errors="*{maximumPrice}"></p>
+            <p class="error" th:errors="*{vehicleType}"></p><p class="error" th:errors="*{sort}"></p>
+            <p class="error" th:errors="*{priceRangeValid}"></p><p class="error" th:errors="*{datePairValid}"></p><p class="error" th:errors="*{dateOrderValid}"></p>
+            <div class="form-actions"><button type="submit">Search vehicles</button><a th:href="@{/listings}">Clear filters</a></div>
+        </form>
+    </section>
+    <div class="section-heading">
+        <div><p class="eyebrow">Ready when you are</p><h2>Available vehicles</h2></div>
+        <p th:text="|${searchPage.totalResults} rides to explore|">Rides to explore</p>
+    </div>
+    <p class="empty-state" th:if="${searchInvalid}">Correct the highlighted search fields to show matching rides.</p>
+    <p class="empty-state" th:if="${!searchInvalid and #lists.isEmpty(searchPage.items)}">No listings match these filters yet. Try another city or clear your filters.</p>
+    <section class="listing-grid">
+        <article class="listing-card" th:each="card : ${searchPage.items}">
+            <img class="listing-photo" th:if="${card.photoUrl != null}"
+                 th:src="${card.photoUrl}" alt="Vehicle photo">
+            <div class="listing-placeholder" th:if="${card.photoUrl == null}" aria-label="No vehicle photo">✦</div>
+            <div class="listing-card-body">
+                <h3 th:text="${card.listing.title}">Listing title</h3>
+                <p th:text="|${card.listing.vehicle.make} ${card.listing.vehicle.model}|">Vehicle</p>
+                <div class="listing-meta"><span class="tag" th:text="${card.listing.vehicle.vehicleType}">Type</span><span class="tag" th:text="${card.listing.city}">City</span></div>
+                <p class="price" th:text="|${card.listing.pricePerDay} / day|">Price per day</p>
+                <a class="card-link" th:href="@{/listings/{id}(id=${card.listing.id})}">View ride details →</a>
+            </div>
+        </article>
+    </section>
+    <nav class="pagination" th:if="${searchPage.totalPages > 1}" aria-label="Listing pages">
+        <a th:if="${searchPage.hasPrevious}" th:href="@{/listings(city=${searchForm.city},vehicleType=${searchForm.vehicleType},minimumPrice=${searchForm.minimumPrice},maximumPrice=${searchForm.maximumPrice},availableFrom=${searchForm.availableFrom},availableTo=${searchForm.availableTo},sort=${searchForm.sort},page=${searchPage.page - 1})}">← Previous</a>
+        <span th:text="|Page ${searchPage.page + 1} of ${searchPage.totalPages}|">Page 1</span>
+        <a th:if="${searchPage.hasNext}" th:href="@{/listings(city=${searchForm.city},vehicleType=${searchForm.vehicleType},minimumPrice=${searchForm.minimumPrice},maximumPrice=${searchForm.maximumPrice},availableFrom=${searchForm.availableFrom},availableTo=${searchForm.availableTo},sort=${searchForm.sort},page=${searchPage.page + 1})}">Next →</a>
+    </nav>
+</main>
+</body>
+</html>

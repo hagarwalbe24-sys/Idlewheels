@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Conversation | IdleWheels</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<main class="container">
+    <a th:href="@{/messages}">← Back to inbox</a>
+    <h1 th:text="${conversation.listing.title}">Listing</h1>
+    <p>Conversation with <strong th:text="${conversation.otherUserName}">User</strong></p>
+    <p><a th:href="@{/listings/{id}(id=${conversation.listing.id})}">View listing</a></p>
+    <p class="empty-state" th:if="${!conversation.canReply}">
+        This conversation is read-only because the listing is <span th:text="${conversation.listing.availableTo.isBefore(T(java.time.LocalDate).now()) ? 'expired' : 'inactive'}">inactive</span>.
+    </p>
+    <p class="success" th:if="${messageSent}">Message sent.</p>
+    <section class="conversation">
+        <article th:each="entry : ${conversation.messages}"
+                 th:class="${entry.sentByCurrentUser} ? 'message-card message-mine' : 'message-card message-theirs'">
+            <p><strong th:text="${entry.message.sender.name}">Sender</strong></p>
+            <p class="message-content" th:text="${entry.message.content}">Message content</p>
+            <small th:text="${entry.sentAtFormatted}">Sent time</small>
+        </article>
+        <p class="empty-state" th:if="${#lists.isEmpty(conversation.messages)}">Start the conversation with the listing owner.</p>
+    </section>
+    <form th:if="${conversation.canReply}" th:action="@{/messages/{listingId}/{otherUserId}(listingId=${conversation.listing.id},otherUserId=${conversation.otherUserId})}"
+          th:object="${messageForm}" method="post">
+        <input type="hidden" name="_csrf" th:value="${csrfToken}">
+        <label for="content">Your message</label>
+        <textarea id="content" th:field="*{content}" rows="4" maxlength="1000"></textarea>
+        <p class="error" th:errors="*{content}"></p>
+        <button type="submit">Send message</button>
+    </form>
+</main>
+</body>
+</html>

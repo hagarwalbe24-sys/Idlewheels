@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Request error | IdleWheels</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<main class="container form-container" th:with="statusCode=${errorStatus != null ? errorStatus : (status != null ? status : 500)}, messageText=${errorMessage != null ? errorMessage : (statusCode == 403 ? 'You do not have permission to open this page.' : (statusCode == 404 ? 'The page or item could not be found.' : (statusCode == 405 ? 'That action is not supported here.' : (statusCode == 413 ? 'The uploaded photo is too large.' : 'The request could not be completed. Please try again.'))))}">
+    <p class="eyebrow">IdleWheels</p>
+    <h1 th:text="${statusCode == 403 ? 'Access denied' : (statusCode == 404 ? 'Page not found' : 'We could not complete that request')}">We could not complete that request</h1>
+    <p th:text="${messageText}">Please try again.</p>
+    <p>Error code: <span th:text="${statusCode}">500</span></p>
+    <a th:href="@{/listings}">Return to listings</a>
+</main>
+</body>
+</html>

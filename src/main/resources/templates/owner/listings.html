@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Listings | IdleWheels</title><link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<main class="container">
+    <p class="eyebrow">Owner dashboard</p>
+    <div class="section-heading"><div><h1 th:text="${editMode} ? 'Edit listing' : 'My rental listings'">My rental listings</h1><p>Publish and manage the vehicles you share.</p></div><a class="button" th:href="@{/owner/vehicles}">My vehicles</a></div>
+    <div class="dashboard-stats" th:unless="${editMode}"><div><strong th:text="${activeCount}">0</strong><span>Active</span></div><div><strong th:text="${inactiveCount}">0</strong><span>Inactive</span></div><div><strong th:text="${expiredCount}">0</strong><span>Expired</span></div></div>
+    <p class="success" th:if="${listingAdded}">Listing created.</p>
+    <p class="success" th:if="${listingUpdated}">Listing updated.</p>
+    <p class="success" th:if="${listingDeactivated}">Listing deactivated.</p>
+    <p class="success" th:if="${listingActivated}">Listing reactivated.</p>
+    <p class="error" th:if="${listingError}" th:text="${listingError}"></p>
+    <p th:if="${#lists.isEmpty(vehicles)}">Add a vehicle before creating a listing.
+        <a th:href="@{/owner/vehicles}">Add a vehicle</a></p>
+    <form class="owner-form" th:action="${formAction}" th:object="${listingForm}" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="_csrf" th:value="${csrfToken}">
+        <label for="vehicleId">Vehicle</label>
+        <select id="vehicleId" th:field="*{vehicleId}">
+            <option value="">Choose a vehicle</option>
+            <option th:each="vehicle : ${vehicles}" th:value="${vehicle.id}"
+                    th:text="|${vehicle.make} ${vehicle.model} (${vehicle.vehicleType})|"></option>
+        </select><p class="error" th:errors="*{vehicleId}"></p>
+        <label for="title">Listing title</label>
+        <input id="title" type="text" th:field="*{title}" maxlength="120"><p class="error" th:errors="*{title}"></p>
+        <label for="description">Description</label><textarea id="description" th:field="*{description}" rows="4" maxlength="2000"></textarea>
+        <small><span id="descriptionCount" th:text="${listingForm.description == null ? 0 : #strings.length(listingForm.description)}">0</span> / 2000 characters</small>
+        <p class="error" th:errors="*{description}"></p>
+        <label for="city">City</label>
+        <input id="city" type="text" th:field="*{city}" maxlength="80"><p class="error" th:errors="*{city}"></p>
+        <label for="pricePerDay">Price per day</label>
+        <input id="pricePerDay" type="number" th:field="*{pricePerDay}" min="0.01" step="0.01">
+        <p class="error" th:errors="*{pricePerDay}"></p>
+        <label for="availableFrom">Available from</label>
+        <input id="availableFrom" type="date" th:field="*{availableFrom}"><p class="error" th:errors="*{availableFrom}"></p>
+        <label for="availableTo">Available to</label>
+        <input id="availableTo" type="date" th:field="*{availableTo}"><p class="error" th:errors="*{availableTo}"></p>
+        <label for="photo">Vehicle photo (JPG, PNG or WEBP; maximum 5 MB)</label>
+        <input id="photo" name="photo" type="file" accept="image/jpeg,image/png,image/webp">
+        <div th:if="${editMode and editingPhotoUrl != null}" class="current-photo">
+            <p>Current photo</p><img class="listing-photo" th:src="${editingPhotoUrl}" alt="Current vehicle photo">
+            <label><input type="checkbox" th:field="*{removePhoto}"> Remove current photo</label>
+        </div>
+        <button type="submit" th:disabled="${#lists.isEmpty(vehicles)}"
+                th:text="${editMode} ? 'Save changes' : 'Create listing'">Create listing</button>
+        <a th:if="${editMode}" th:href="@{/owner/listings}">Cancel edit</a>
+    </form>
+    <hr><h2>Your listings</h2>
+    <p class="empty-state" th:if="${#lists.isEmpty(listings)}">You have not created any listings yet.</p>
+    <article class="listing-card" th:each="listing : ${listings}">
+        <img class="listing-photo" th:if="${photoUrls[listing.id] != null}"
+             th:src="${photoUrls[listing.id]}" alt="Vehicle photo">
+        <div class="listing-placeholder" th:if="${photoUrls[listing.id] == null}" aria-hidden="true">✦</div>
+        <div class="listing-card-body">
+            <h3 th:text="${listing.title}">Listing title</h3>
+            <p><span th:text="|${listing.vehicle.make} ${listing.vehicle.model}|">Vehicle</span> ·
+                <span th:text="${listing.city}">City</span> · <span th:text="${listing.pricePerDay}">0.00</span> per day ·
+                <span class="tag" th:text="${listing.status}">ACTIVE</span>
+                <span class="tag" th:if="${expiredListingIds.contains(listing.id)}">Expired</span></p>
+            <div class="form-actions"><a th:href="@{/owner/listings/{id}/edit(id=${listing.id})}">Edit</a>
+                <form th:if="${listing.status.name() == 'ACTIVE'}"
+                      th:action="@{/owner/listings/{id}/deactivate(id=${listing.id})}" method="post">
+                    <input type="hidden" name="_csrf" th:value="${csrfToken}">
+                    <button type="submit">Deactivate</button>
+                </form>
+                <form th:if="${listing.status.name() == 'INACTIVE' and !expiredListingIds.contains(listing.id)}"
+                      th:action="@{/owner/listings/{id}/activate(id=${listing.id})}" method="post">
+                    <input type="hidden" name="_csrf" th:value="${csrfToken}">
+                    <button type="submit">Reactivate</button>
+                </form>
+            </div>
+        </div>
+    </article>
+</main>
+<script>
+    const descriptionField = document.getElementById('description');
+    const descriptionCounter = document.getElementById('descriptionCount');
+    if (descriptionField && descriptionCounter) {
+        descriptionField.addEventListener('input', () => descriptionCounter.textContent = descriptionField.value.length);
+    }
+</script>
+</body>
+</html>

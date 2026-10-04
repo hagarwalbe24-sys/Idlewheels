@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Vehicles | IdleWheels</title><link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<main class="container">
+    <p class="eyebrow">Owner dashboard</p>
+    <div class="section-heading"><div><h1 th:text="${editMode} ? 'Edit vehicle' : 'My vehicles'">My vehicles</h1><p>Add or update a car or bike you want to share.</p></div><a class="button" th:href="@{/owner/listings}">Manage listings</a></div>
+
+    <p class="success" th:if="${vehicleAdded}">Vehicle added successfully.</p>
+    <p class="success" th:if="${vehicleUpdated}">Vehicle updated.</p>
+    <p class="success" th:if="${vehicleDeleted}">Vehicle deleted.</p>
+    <p class="error" th:if="${vehicleError}" th:text="${vehicleError}"></p>
+
+    <form class="owner-form" th:action="${vehicleFormAction}" th:object="${vehicleForm}" method="post">
+        <input type="hidden" name="_csrf" th:value="${csrfToken}">
+        <div class="owner-form-grid">
+            <div class="wide">
+                <label for="vehicleType">Vehicle type</label>
+                <select id="vehicleType" th:field="*{vehicleType}" th:disabled="${editMode}">
+                    <option value="">Choose a type</option><option value="CAR">Car</option><option value="BIKE">Bike</option>
+                </select>
+                <input th:if="${editMode}" type="hidden" name="vehicleType" th:value="*{vehicleType}">
+                <p class="error" th:errors="*{vehicleType}"></p>
+            </div>
+            <div><label for="make">Make</label><input id="make" type="text" th:field="*{make}" maxlength="60" placeholder="e.g. Toyota"><p class="error" th:errors="*{make}"></p></div>
+            <div><label for="model">Model</label><input id="model" type="text" th:field="*{model}" maxlength="60" placeholder="e.g. Corolla"><p class="error" th:errors="*{model}"></p></div>
+            <div><label for="manufactureYear">Year</label><input id="manufactureYear" type="number" th:field="*{manufactureYear}" min="1980" th:attr="max=${T(java.time.Year).now().value + 1}"><p class="error" th:errors="*{manufactureYear}"></p><p class="error" th:errors="*{yearInAllowedRange}"></p></div>
+            <div id="carFields" class="wide">
+                <h2>Car details</h2>
+                <label for="seats">Number of seats</label><input id="seats" type="number" th:field="*{seats}" min="1" max="12">
+                <label for="transmission">Transmission</label>
+                <select id="transmission" th:field="*{transmission}"><option value="">Choose a transmission</option><option value="MANUAL">Manual</option><option value="AUTOMATIC">Automatic</option></select>
+            </div>
+            <div id="bikeFields" class="wide">
+                <h2>Bike details</h2>
+                <label for="engineCc">Engine capacity (cc)</label><input id="engineCc" type="number" th:field="*{engineCc}" min="50" max="2500">
+            </div>
+            <div class="wide"><p class="error" th:errors="*{typeDetailsValid}"></p></div>
+        </div>
+        <div class="form-actions"><button type="submit" th:text="${editMode} ? 'Save vehicle' : 'Add vehicle'">Add vehicle</button><a th:if="${editMode}" th:href="@{/owner/vehicles}">Cancel</a></div>
+    </form>
+
+    <div class="section-heading"><div><p class="eyebrow">Your garage</p><h2>Saved vehicles</h2></div></div>
+    <p class="empty-state" th:if="${#lists.isEmpty(vehicles)}">You have not added any vehicles yet.</p>
+    <section class="listing-grid">
+        <article class="listing-card listing-card-body" th:each="vehicle : ${vehicles}">
+            <div class="listing-meta"><span class="tag" th:text="${vehicle.vehicleType}">TYPE</span><span class="tag" th:text="${vehicle.manufactureYear}">YEAR</span></div>
+            <h3><span th:text="${vehicle.make}">Make</span> <span th:text="${vehicle.model}">Model</span></h3>
+            <p th:if="${vehicle.vehicleType.name() == 'CAR'}"><span th:text="${vehicle.seats}">5</span> seats · <span th:text="${vehicle.transmission}">Manual</span></p>
+            <p th:if="${vehicle.vehicleType.name() == 'BIKE'}"><span th:text="${vehicle.engineCc}">150</span> cc</p>
+            <div class="form-actions"><a th:href="@{/owner/vehicles/{id}/edit(id=${vehicle.id})}">Edit</a>
+                <form th:action="@{/owner/vehicles/{id}/delete(id=${vehicle.id})}" method="post">
+                    <input type="hidden" name="_csrf" th:value="${csrfToken}"><button type="submit">Delete vehicle</button>
+                </form>
+            </div>
+        </article>
+    </section>
+</main>
+<script>
+    const typeSelect = document.getElementById('vehicleType');
+    const carFields = document.getElementById('carFields');
+    const bikeFields = document.getElementById('bikeFields');
+    if (typeSelect && carFields && bikeFields) {
+        const updateVehicleFields = () => {
+            if (typeSelect.value === 'CAR') { carFields.hidden = false; bikeFields.hidden = true; }
+            else if (typeSelect.value === 'BIKE') { carFields.hidden = true; bikeFields.hidden = false; }
+            else { carFields.hidden = false; bikeFields.hidden = false; }
+        };
+        typeSelect.addEventListener('change', updateVehicleFields);
+        updateVehicleFields();
+    }
+</script>
+</body>
+</html>

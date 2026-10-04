@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Profile | IdleWheels</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<main class="container form-container">
+    <p class="eyebrow">Your account</p><h1>Profile settings</h1>
+    <p class="success" th:if="${param.updated}">Your profile was updated.</p>
+    <p class="error" th:if="${profileError}" th:text="${profileError}"></p>
+    <p>Email: <strong th:text="${profileUser.email}">email@example.com</strong> · <span th:text="${profileUser.role}">Role</span></p>
+    <form th:action="@{/profile}" th:object="${profileForm}" method="post">
+        <input type="hidden" name="_csrf" th:value="${csrfToken}">
+        <label for="name">Name</label><input id="name" th:field="*{name}" maxlength="100" required><p class="error" th:errors="*{name}"></p>
+        <label for="phone">Phone (optional; hidden from renters)</label><input id="phone" type="tel" th:field="*{phone}" maxlength="15"><p class="error" th:errors="*{phone}"></p>
+        <label for="city">City</label><input id="city" th:field="*{city}" maxlength="80" required><p class="error" th:errors="*{city}"></p>
+        <h2>Change password</h2>
+        <label for="currentPassword">Current password</label><input id="currentPassword" type="password" th:field="*{currentPassword}" autocomplete="current-password"><p class="error" th:errors="*{currentPassword}"></p>
+        <label for="newPassword">New password (leave blank to keep current)</label><input id="newPassword" type="password" th:field="*{newPassword}" autocomplete="new-password"><p class="error" th:errors="*{newPassword}"></p>
+        <button type="submit">Save profile</button>
+    </form>
+</main>
+</body>
+</html>

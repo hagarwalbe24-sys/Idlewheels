@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Messages | IdleWheels</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<main class="container">
+    <p class="eyebrow">Stay in the loop</p><h1>Messages</h1>
+    <p class="empty-state" th:if="${#lists.isEmpty(conversations)}">You have no conversations yet.</p>
+    <article class="listing-card listing-card-body" th:each="conversation : ${conversations}">
+        <h2 th:text="${conversation.listingTitle}">Listing</h2>
+        <p>Conversation with <strong th:text="${conversation.otherUserName}">User</strong></p>
+        <p th:text="${conversation.latestMessage}">Latest message</p>
+        <p><small th:text="${conversation.latestSentAtFormatted}">Time</small></p>
+        <p th:if="${conversation.unreadCount > 0}"><span class="nav-badge" th:text="|${conversation.unreadCount} unread|">Unread</span></p>
+        <div class="form-actions">
+            <a th:href="@{/listings/{id}(id=${conversation.listingId})}">View listing</a>
+            <a th:href="@{/messages/{listingId}/{otherUserId}(listingId=${conversation.listingId},otherUserId=${conversation.otherUserId})}">Open conversation</a>
+        </div>
+    </article>
+</main>
+</body>
+</html>

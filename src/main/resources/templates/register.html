@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Register | IdleWheels</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="container form-container">
+        <p class="eyebrow">Start your IdleWheels journey</p>
+        <h1>Create an account</h1>
+        <p>Join as an owner sharing a vehicle or a renter looking for one.</p>
+
+        <p class="error" th:if="${registrationError}" th:text="${registrationError}"></p>
+
+        <form th:action="@{/register}" th:object="${registrationForm}" method="post">
+            <input type="hidden" name="_csrf" th:value="${csrfToken}">
+            <label for="name">Name</label>
+            <input id="name" type="text" th:field="*{name}" required maxlength="100">
+            <p class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+
+            <label for="email">Email</label>
+            <input id="email" type="email" th:field="*{email}" required maxlength="150">
+            <p class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+
+            <label for="password">Password</label>
+            <input id="password" type="password" th:field="*{password}"
+                   required minlength="8" maxlength="72" autocomplete="new-password">
+            <p class="error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+
+            <label for="phone">Phone (optional)</label>
+            <input id="phone" type="tel" th:field="*{phone}" maxlength="15">
+            <p class="error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></p>
+
+            <label for="city">City</label>
+            <input id="city" type="text" th:field="*{city}" required maxlength="80">
+            <p class="error" th:if="${#fields.hasErrors('city')}" th:errors="*{city}"></p>
+
+            <label for="role">Account type</label>
+            <select id="role" th:field="*{role}" required>
+                <option value="">Choose Owner or Renter</option>
+                <option value="OWNER">Owner</option>
+                <option value="RENTER">Renter</option>
+            </select>
+            <p class="error" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></p>
+
+            <div class="form-actions"><button type="submit">Create account</button></div>
+        </form>
+
+        <p>Already registered? <a th:href="@{/login}">Log in</a></p>
+    </main>
+</body>
+</html>

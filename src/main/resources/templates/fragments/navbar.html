@@ -1,0 +1,23 @@
+<nav class="navbar" th:fragment="navbar" xmlns:th="http://www.thymeleaf.org">
+    <a class="brand" th:href="@{/}">IdleWheels</a>
+
+    <div class="nav-links" th:if="${session.userId == null}">
+        <a th:href="@{/login}">Log in</a>
+        <a th:href="@{/register}">Register</a>
+    </div>
+
+    <div class="nav-links" th:if="${session.userId != null}">
+        <span>
+            Hi, <span th:text="${session.userName}">User</span>
+            (<span th:text="${session.userRole}">Role</span>)
+        </span>
+        <a th:href="@{/messages}">Messages <span class="nav-badge" th:if="${unreadMessageCount > 0}" th:text="${unreadMessageCount}">0</span></a>
+        <a th:href="@{/profile}">Profile</a>
+        <a th:if="${session.userRole == 'OWNER'}" th:href="@{/owner/vehicles}">My vehicles</a>
+        <a th:if="${session.userRole == 'OWNER'}" th:href="@{/owner/listings}">My listings</a>
+        <form th:action="@{/logout}" method="post">
+            <input type="hidden" name="_csrf" th:value="${csrfToken}">
+            <button class="link-button" type="submit">Log out</button>
+        </form>
+    </div>
+</nav>                                                                                                                                                                                                                                                                                                                                                  

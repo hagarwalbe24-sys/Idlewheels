@@ -1,0 +1,35 @@
+# Build output and IDE files
+target/
+build/
+.mvn/wrapper/maven-wrapper.jar
+.apt_generated/
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+.env
+application-local.properties
+
+# Local uploads and diagnostics
+uploads/
+*.log
+run-error*.txt
+test-error.txt
+vehicle-page-error.txt
+idlewheels-debug.txt
+HELP.md
+
+# Other build tooling
+.gradle/
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
