@@ -28,7 +28,7 @@
             </div>
             <div><label for="make">Make</label><input id="make" type="text" th:field="*{make}" maxlength="60" placeholder="e.g. Toyota"><p class="error" th:errors="*{make}"></p></div>
             <div><label for="model">Model</label><input id="model" type="text" th:field="*{model}" maxlength="60" placeholder="e.g. Corolla"><p class="error" th:errors="*{model}"></p></div>
-            <div><label for="manufactureYear">Year</label><input id="manufactureYear" type="number" th:field="*{manufactureYear}" min="1980" th:attr="max=${T(java.time.Year).now().value + 1}"><p class="error" th:errors="*{manufactureYear}"></p><p class="error" th:errors="*{yearInAllowedRange}"></p></div>
+            <div><label for="manufactureYear">Year</label><input id="manufactureYear" type="number" th:field="*{manufactureYear}" min="1980"><p class="error" th:errors="*{manufactureYear}"></p><p class="error" th:errors="*{yearInAllowedRange}"></p></div>
             <div id="carFields" class="wide">
                 <h2>Car details</h2>
                 <label for="seats">Number of seats</label><input id="seats" type="number" th:field="*{seats}" min="1" max="12">

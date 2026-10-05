@@ -10,7 +10,7 @@
     <p>Conversation with <strong th:text="${conversation.otherUserName}">User</strong></p>
     <p><a th:href="@{/listings/{id}(id=${conversation.listing.id})}">View listing</a></p>
     <p class="empty-state" th:if="${!conversation.canReply}">
-        This conversation is read-only because the listing is <span th:text="${conversation.listing.availableTo.isBefore(T(java.time.LocalDate).now()) ? 'expired' : 'inactive'}">inactive</span>.
+        This conversation is read-only because the listing is <span th:text="${conversation.listing.status.name() != 'ACTIVE' ? 'inactive' : 'expired'}">inactive</span>.
     </p>
     <p class="success" th:if="${messageSent}">Message sent.</p>
     <section class="conversation">

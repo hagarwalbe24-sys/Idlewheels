@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="|${listing.title} | IdleWheels|">Listing details | IdleWheels</title>
+    <title th:text="${listing.title} + ' | IdleWheels'">Listing details | IdleWheels</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
@@ -16,7 +16,7 @@
             <img class="detail-photo" th:if="${photoUrl != null}" th:src="${photoUrl}" alt="Vehicle photo">
             <div class="listing-placeholder" th:if="${photoUrl == null}" aria-label="No vehicle photo">✦</div>
             <p class="eyebrow" th:text="${listing.vehicle.vehicleType}">VEHICLE</p>
-            <p class="tag" th:if="${ownerPreview}" th:text="${listing.availableTo.isBefore(T(java.time.LocalDate).now()) ? 'Expired listing preview' : 'Inactive listing preview'}">Owner preview</p>
+            <p class="tag" th:if="${ownerPreview}" th:text="${listing.status.name() != 'ACTIVE' ? 'Inactive listing preview' : 'Expired listing preview'}">Owner preview</p>
             <h1 th:text="${listing.title}">Listing title</h1>
             <h2 style="margin-top:8px">
                 <span th:text="${listing.vehicle.make}">Make</span>
@@ -36,9 +36,17 @@
             <h2 style="margin-top:0">Rental details</h2>
             <p class="price" style="font-size:1.6rem"><span th:text="${listing.pricePerDay}">0.00</span> / day</p>
             <p>Listed by <strong th:text="${listing.owner.name}">Owner</strong></p>
-            <a class="button" th:if="${session.userRole == 'RENTER' and session.userId != listing.owner.id}"
-               th:href="@{/messages/{listingId}/{otherUserId}(listingId=${listing.id},otherUserId=${listing.owner.id})}">Message owner</a>
-            <p th:if="${session.userId == null}"><a th:href="@{/login}">Log in</a> to message the owner.</p>
+            <form th:if="${session.userRole == 'RENTER'}"
+                  th:action="@{/messages/{listingId}/{ownerId}(listingId=${listing.id},ownerId=${listing.owner.id})}"
+                  th:object="${messageForm}" method="post">
+                <input type="hidden" name="_csrf" th:value="${csrfToken}">
+                <label for="content">Message the owner</label>
+                <textarea id="content" th:field="*{content}" rows="4" maxlength="1000"
+                          placeholder="Hi, is this vehicle available on my dates?" required></textarea>
+                <button type="submit">Send message</button>
+            </form>
+            <p th:if="${session.userRole == 'RENTER'}"><a th:href="@{/messages/{listingId}/{ownerId}(listingId=${listing.id},ownerId=${listing.owner.id})}">Open full conversation</a></p>
+            <p th:if="${session.userId == null}"><a th:href="@{/messages/{listingId}/{ownerId}(listingId=${listing.id},ownerId=${listing.owner.id})}">Log in</a> to message the owner.</p>
         </aside>
     </div>
 </main>

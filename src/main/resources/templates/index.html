@@ -57,6 +57,8 @@
                 <div class="listing-meta"><span class="tag" th:text="${card.listing.vehicle.vehicleType}">Type</span><span class="tag" th:text="${card.listing.city}">City</span></div>
                 <p class="price" th:text="|${card.listing.pricePerDay} / day|">Price per day</p>
                 <a class="card-link" th:href="@{/listings/{id}(id=${card.listing.id})}">View ride details →</a>
+                <a class="button" th:if="${session.userRole != 'OWNER'}"
+                   th:href="@{/messages/{listingId}/{ownerId}(listingId=${card.listing.id},ownerId=${card.listing.owner.id})}">Message owner</a>
             </div>
         </article>
     </section>
